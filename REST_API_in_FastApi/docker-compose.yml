@@ -1,0 +1,34 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: advertisement-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://advertisement:advertisement@db:5432/advertisement
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: advertisement-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: advertisement
+      POSTGRES_USER: advertisement
+      POSTGRES_PASSWORD: advertisement
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U advertisement -d advertisement
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
